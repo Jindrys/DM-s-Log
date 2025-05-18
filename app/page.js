@@ -134,7 +134,9 @@ export default function Home() {
         </div>
         <footer className="w-full h-[180px] bg-linear-to-t from-[#978665] from-5% via-[#FBEFD8]  to-[#978665] to-95% border-x-8 flex flex-col gap-3 justify-center items-center">
           <p>&copy; 2025 DM's Log. All rights reserved.</p>
-          <p class="mt-1">Made with love for Dungeons & Dragons enthusiasts.</p>
+          <p className="mt-1">
+            Made with love for Dungeons & Dragons enthusiasts.
+          </p>
         </footer>
       </section>
     </div>

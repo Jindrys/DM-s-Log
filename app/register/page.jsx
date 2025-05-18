@@ -1,10 +1,10 @@
 import React from "react";
-import LoginSpinner from "../components/LoginSpinner";
+import RegisterSpinner from "../components/RegisterSpinner";
 
 const Login = () => {
   return (
     <div>
-      <LoginSpinner />
+      <RegisterSpinner />
     </div>
   );
 };

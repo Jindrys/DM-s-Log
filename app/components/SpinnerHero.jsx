@@ -6,7 +6,7 @@ import Image from "next/image";
 const images = ["/criss.png", "/narcelia.png", "/hordur.png", "/syrien.png"];
 const characterNames = ["Criss", "Narcelia", "Hordur", "Syrien"];
 
-function SpinnerHero() {
+function SpinnerHero({ flipped = false }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [animationClass, setAnimationClass] = useState(
     "translate-x-[-100%] opacity-0"
@@ -39,7 +39,7 @@ function SpinnerHero() {
           layout="intrinsic"
           width={500}
           height={300}
-          className="rounded-md"
+          className={flipped ? "scale-x-[-1]" : ""}
         />
       </div>
 
