@@ -1,8 +1,13 @@
 import React from "react";
 import Navbar from "../components/Navbar";
+import MainSpinner from "../components/MainSpinner";
 
 const Login = () => {
-  return <div>tady bude login</div>;
+  return (
+    <div>
+      <MainSpinner />
+    </div>
+  );
 };
 
 export default Login;
