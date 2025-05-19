@@ -1,5 +1,6 @@
 import React from "react";
 import CampaignCard from "../components/CampaignCard";
+import Link from "next/link";
 
 function page() {
   return (
@@ -9,9 +10,11 @@ function page() {
           <div className="text-6xl uppercase underline font-gambarino">
             username
           </div>
-          <div className="underline text-2xl uppercase">invites</div>
+          <div className="underline text-2xl uppercase">invites {"(0)"}</div>
           <div className="underline text-2xl uppercase">create campaign</div>
-          <div className="underline text-2xl uppercase">notes</div>
+          <Link href="/notes" className="underline text-2xl uppercase">
+            notes
+          </Link>
           <div className="underline text-xl uppercase bg-red-500/50 px-4 py-2 rounded">
             log out
           </div>
