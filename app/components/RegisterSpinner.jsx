@@ -11,7 +11,7 @@ const images = [
   "/bgmain-syrien.png",
 ];
 
-function LoginSpinner() {
+function RegisterSpinner() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
@@ -111,4 +111,4 @@ function LoginSpinner() {
   );
 }
 
-export default LoginSpinner;
+export default RegisterSpinner;
