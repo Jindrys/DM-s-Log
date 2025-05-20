@@ -1,27 +1,13 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import UserNav from "../components/UserNav";
 
 function page() {
   return (
     <div className="bg-black py-10 flex flex-col items-center h-fit">
       <div className="w-[95%] h-fit flex flex-col items-center bg-[#F6EEE3] gap-10">
-        <nav className="flex w-full h-fit mt-5 items-center justify-between border-b-2 pb-4 px-[80px]">
-          <Link
-            href="/user"
-            className="text-6xl uppercase underline font-gambarino"
-          >
-            username
-          </Link>
-          <div className="underline text-2xl uppercase">invites {"(0)"}</div>
-          <div className="underline text-2xl uppercase">create campaign</div>
-          <Link href="/notes" className="underline text-2xl uppercase">
-            notes
-          </Link>
-          <div className="underline text-xl uppercase bg-red-500/50 px-4 py-2 rounded">
-            log out
-          </div>
-        </nav>
+        <UserNav />
 
         <div className="flex  w-[90%] h-fit justify-between">
           <div className="w-[50%] flex flex-col gap-2">
@@ -92,7 +78,7 @@ function page() {
               className="w-full max-h-[450px]"
             />
             <h2 className="w-full flex justify-center text-5xl font-gambarino">
-              Azzendriel
+              WORLD: Azzendriel
             </h2>
           </div>
         </div>

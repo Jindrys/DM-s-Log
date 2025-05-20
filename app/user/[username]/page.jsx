@@ -1,24 +1,12 @@
 import React from "react";
-import CampaignCard from "../components/CampaignCard";
-import Link from "next/link";
+import CampaignCard from "../../components/CampaignCard";
+import UserNav from "@/app/components/UserNav";
 
 function page() {
   return (
     <div className="bg-black py-10 flex flex-col items-center h-fit">
       <div className="w-[95%] h-fit flex flex-col items-center bg-[#F6EEE3] gap-10">
-        <nav className="flex w-full h-fit mt-5 items-center justify-between border-b-2 pb-4 px-[80px]">
-          <div className="text-6xl uppercase underline font-gambarino">
-            username
-          </div>
-          <div className="underline text-2xl uppercase">invites {"(0)"}</div>
-          <div className="underline text-2xl uppercase">create campaign</div>
-          <Link href="/notes" className="underline text-2xl uppercase">
-            notes
-          </Link>
-          <div className="underline text-xl uppercase bg-red-500/50 px-4 py-2 rounded">
-            log out
-          </div>
-        </nav>
+        <UserNav />
 
         <div className="flex flex-col w-[90%] gap-4">
           <h2 className="uppercase text-6xl font-gambarino underline">

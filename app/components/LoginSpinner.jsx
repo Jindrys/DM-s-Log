@@ -74,11 +74,13 @@ function LoginSpinner() {
             </div>
 
             <button
+              href="/user/xxx"
               type="submit"
               className="w-[90%] uppercase py-3 text-3xl bg-red-500 text-white rounded-[8px]"
             >
               Continue in your journey
             </button>
+            <Link href="/user/xxx">muj skip</Link>
 
             <p className="text-xl uppercase">
               Don't have an account?{" "}

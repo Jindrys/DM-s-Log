@@ -1,31 +1,29 @@
-import React from "react";
-import Image from "next/image";
-import Link from "next/link";
+"use client";
+import React, { useState } from "react";
 import NoteCard from "../components/NoteCard";
+import UserNav from "../components/UserNav";
 
-function page() {
+function Page() {
+  const [showNoteModal, setShowNoteModal] = useState(false);
+
+  const handleOpenNoteModal = () => setShowNoteModal(true);
+  const handleCloseNoteModal = () => setShowNoteModal(false);
+  const handleCreateNote = () => {
+    setShowNoteModal(false);
+  };
+
   return (
     <div className="bg-black py-10 flex flex-col items-center h-fit">
       <div className="w-[95%] h-fit flex flex-col items-center bg-[#F6EEE3] gap-10">
-        <nav className="flex w-full h-fit mt-5 items-center justify-between border-b-2 pb-4 px-[80px]">
-          <Link
-            href="/user"
-            className="text-6xl uppercase underline font-gambarino"
-          >
-            username
-          </Link>
-          <div className="underline text-2xl uppercase">invites {"(0)"}</div>
-          <div className="underline text-2xl uppercase">create campaign</div>
-          <Link href="/notes" className="underline text-2xl uppercase">
-            notes
-          </Link>
-          <div className="underline text-xl uppercase bg-red-500/50 px-4 py-2 rounded">
-            log out
-          </div>
-        </nav>
-        <div className="px-6 py-2 uppercase border-2 rounded-[5px] bg-white">
+        <UserNav />
+
+        <button
+          onClick={handleOpenNoteModal}
+          className="px-6 py-2 uppercase border-2 rounded-[5px] bg-white"
+        >
           CREATE NEW NOTE
-        </div>
+        </button>
+
         <div className="flex flex-wrap justify-between w-[90%] min-h-[75vh]">
           <NoteCard />
           <NoteCard />
@@ -34,8 +32,48 @@ function page() {
           <NoteCard />
         </div>
       </div>
+
+      {/* NOTE MODAL */}
+      {showNoteModal && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={handleCloseNoteModal}
+        >
+          <div
+            className="bg-white p-6 w-[700px] rounded shadow-xl space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-3xl font-bold underline uppercase font-gambarino">
+              Create Note
+            </h2>
+            <input
+              type="text"
+              placeholder="Note Title"
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+            <textarea
+              placeholder="Note Content"
+              className="w-full p-2 border border-gray-300 rounded min-h-[200px]"
+            />
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={handleCloseNoteModal}
+                className="px-4 py-2 font-gambarino rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateNote}
+                className="px-4 py-2 bg-gray-700 font-gambarino text-white rounded"
+              >
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-export default page;
+export default Page;
