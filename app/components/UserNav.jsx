@@ -1,51 +1,145 @@
 "use client";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
 function UserNav() {
+  const router = useRouter();
+  const [username, setUsername] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [invites, setInvites] = useState([]);
   const [createdMessage, setCreatedMessage] = useState("");
 
-  // Mocknuté invite data
-  const invites = [
-    { id: 1, campaign: "Shadowfall", role: "Dungeon Master" },
-    { id: 2, campaign: "Frost Realm", role: "Player" },
-  ];
+  // Form inputs
+  const [name, setName] = useState("");
+  const [dungeonMaster, setDungeonMaster] = useState("");
+  const [players, setPlayers] = useState("");
+  const [characters, setCharacters] = useState("");
+  const [story, setStory] = useState("");
+  const [world, setWorld] = useState("");
+  const [thumbnailUrl, setThumbnailUrl] = useState("");
+  const [illustrationUrl, setIllustrationUrl] = useState("");
 
-  const handleOpenModal = () => setShowModal(true);
-  const handleCloseModal = () => setShowModal(false);
+  // Load username
+  useEffect(() => {
+    const user = localStorage.getItem("username");
+    if (!user) router.push("/login");
+    setUsername(user);
+    setDungeonMaster(user);
+  }, [router]);
 
-  const handleOpenInviteModal = () => setShowInviteModal(true);
-  const handleCloseInviteModal = () => setShowInviteModal(false);
+  // Load invites
+  useEffect(() => {
+    if (!username) return;
 
-  const handleCreateCampaign = () => {
-    setShowModal(false);
-    setCreatedMessage("Campaign created!");
-    setTimeout(() => setCreatedMessage(""), 3000);
+    const fetchInvites = async () => {
+      const res = await fetch(`/api/invites?player=${username}`);
+      const data = await res.json();
+      setInvites(data);
+    };
+
+    fetchInvites();
+  }, [username]);
+
+  const handleImageUpload = async (e, setUrl) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (res.ok) setUrl(data.url);
+      else console.error(data.message);
+    } catch (err) {
+      console.error("Image upload failed:", err);
+    }
+  };
+
+  const handleCreateCampaign = async () => {
+    const creator = username;
+    const playerList = players.split(",").map((p) => p.trim());
+    const characterList = characters.split(",").map((c) => c.trim());
+
+    const campaignData = {
+      name,
+      creator,
+      dungeonMaster,
+      players: playerList,
+      characters: characterList,
+      story,
+      world,
+      thumbnail: thumbnailUrl,
+      illustration: illustrationUrl,
+    };
+
+    try {
+      const res = await fetch("/api/campaign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(campaignData),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to create");
+
+      setCreatedMessage("Campaign created!");
+      setShowModal(false);
+      setTimeout(() => setCreatedMessage(""), 3000);
+
+      // Reset form
+      setName("");
+      setPlayers("");
+      setCharacters("");
+      setStory("");
+      setWorld("");
+      setThumbnailUrl("");
+      setIllustrationUrl("");
+    } catch (err) {
+      console.error("❌ Create campaign error:", err);
+    }
+  };
+
+  const handleInviteResponse = async (inviteId, action) => {
+    try {
+      await fetch("/api/invites", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ inviteId, action }),
+      });
+
+      setInvites((prev) => prev.filter((inv) => inv._id !== inviteId));
+    } catch (err) {
+      console.error("❌ Failed to update invite:", err);
+    }
   };
 
   return (
     <>
       <nav className="flex w-full h-fit mt-5 items-center justify-between border-b-2 pb-4 px-[80px]">
         <Link
-          href="/user/xxx"
+          href={`/user/${username}`}
           className="text-6xl uppercase underline font-gambarino"
         >
-          username
+          {username}
         </Link>
 
-        {/* INVITES */}
         <button
-          onClick={handleOpenInviteModal}
+          onClick={() => setShowInviteModal(true)}
           className="underline text-2xl uppercase"
         >
           invites ({invites.length})
         </button>
 
-        {/* CREATE CAMPAIGN */}
         <button
-          onClick={handleOpenModal}
+          onClick={() => setShowModal(true)}
           className="underline text-2xl uppercase"
         >
           create campaign
@@ -54,21 +148,26 @@ function UserNav() {
         <Link href="/notes" className="underline text-2xl uppercase">
           notes
         </Link>
-        <Link
-          href="/login"
+
+        <button
+          onClick={() => {
+            localStorage.removeItem("username");
+            router.push("/login");
+          }}
           className="underline text-xl uppercase bg-red-500/50 px-4 py-2 rounded"
         >
           log out
-        </Link>
+        </button>
       </nav>
 
+      {/* Created message */}
       {createdMessage && (
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-2 rounded shadow-lg z-50">
           {createdMessage}
         </div>
       )}
 
-      {/* CREATE CAMPAIGN MODAL */}
+      {/* Modal: Create Campaign */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white p-8 w-[500px] space-y-4 shadow-xl">
@@ -78,48 +177,56 @@ function UserNav() {
             <input
               type="text"
               placeholder="Campaign Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded"
             />
             <input
               type="text"
-              placeholder="Dungeon Master - creator/e-mail"
+              placeholder="Players (comma-separated)"
+              value={players}
+              onChange={(e) => setPlayers(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded"
             />
-            <div>
-              <h3 className="font-gambarino">
-                Write players on same place as their characters
-              </h3>
-              <input
-                type="text"
-                placeholder="Players - e-mail"
-                className="w-full p-2 border border-gray-300 rounded"
-              />
-            </div>
             <input
               type="text"
-              placeholder="Characters"
+              placeholder="Characters (comma-separated)"
+              value={characters}
+              onChange={(e) => setCharacters(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded"
             />
-            <div>
-              <h3>Import an illustration image</h3>
-              <input
-                type="file"
-                accept="image/png, image/jpeg"
-                className="w-full p-2 border border-gray-300 rounded cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-gray-700 hover:file:bg-blue-100"
-              />
-            </div>
             <input
               type="text"
               placeholder="World"
+              value={world}
+              onChange={(e) => setWorld(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded"
             />
             <textarea
               placeholder="Story"
+              value={story}
+              onChange={(e) => setStory(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded"
             />
+            <div>
+              <label>Thumbnail Image:</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleImageUpload(e, setThumbnailUrl)}
+              />
+            </div>
+            <div>
+              <label>Illustration Image:</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleImageUpload(e, setIllustrationUrl)}
+              />
+            </div>
             <div className="flex justify-end space-x-4">
               <button
-                onClick={handleCloseModal}
+                onClick={() => setShowModal(false)}
                 className="px-4 py-2 bg-gray-300 rounded"
               >
                 Cancel
@@ -135,11 +242,11 @@ function UserNav() {
         </div>
       )}
 
-      {/* INVITES MODAL */}
+      {/* Modal: Invites */}
       {showInviteModal && (
         <div
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-          onClick={handleCloseInviteModal}
+          onClick={() => setShowInviteModal(false)}
         >
           <div
             className="bg-white p-6 w-[700px] shadow-xl rounded space-y-4"
@@ -154,47 +261,28 @@ function UserNav() {
               <ul className="space-y-3">
                 {invites.map((invite) => (
                   <li
-                    key={invite.id}
-                    className="relative border p-3 rounded shadow-sm bg-gray-100"
+                    key={invite._id}
+                    className="relative border p-3 rounded bg-gray-100"
                   >
-                    You were invited as{" "}
-                    <strong className="font-poppins font-bold">
-                      {invite.role}
-                    </strong>{" "}
-                    to{" "}
-                    <span className="font-poppins font-bold">
-                      {invite.campaign}
-                    </span>
+                    You're invited to:{" "}
+                    <strong>{invite.campaignId?.name}</strong>
                     <div className="absolute flex gap-2 top-1/2 -translate-y-1/2 right-3">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="size-7 border rounded bg-green-300/50 cursor-pointer"
+                      <button
+                        className="px-3 py-1 bg-green-500 text-white rounded"
+                        onClick={() =>
+                          handleInviteResponse(invite._id, "accepted")
+                        }
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="m4.5 12.75 6 6 9-13.5"
-                        />
-                      </svg>
-
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="size-7 border rounded bg-red-300/50 cursor-pointer"
+                        Accept
+                      </button>
+                      <button
+                        className="px-3 py-1 bg-red-500 text-white rounded"
+                        onClick={() =>
+                          handleInviteResponse(invite._id, "declined")
+                        }
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636"
-                        />
-                      </svg>
+                        Decline
+                      </button>
                     </div>
                   </li>
                 ))}
@@ -202,7 +290,7 @@ function UserNav() {
             )}
             <div className="flex justify-end">
               <button
-                onClick={handleCloseInviteModal}
+                onClick={() => setShowInviteModal(false)}
                 className="px-4 py-2 underline font-gambarino rounded cursor-pointer"
               >
                 Close

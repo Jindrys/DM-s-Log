@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import SpinnerHero from "./SpinnerHero";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import SpinnerHero from "./SpinnerHero";
 
 const images = [
   "/bgmain-criss.png",
@@ -13,14 +14,48 @@ const images = [
 
 function LoginSpinner() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
+    const savedUsername = localStorage.getItem("username");
+    if (savedUsername) {
+      router.push(`/user/${savedUsername}`);
+    }
+
     const interval = setTimeout(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
     }, 4500);
-
     return () => clearTimeout(interval);
   }, [currentIndex]);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Login failed.");
+        return;
+      }
+
+      localStorage.setItem("username", data.username);
+      router.push(`/user/${data.username}`);
+    } catch (err) {
+      console.error(err);
+      setError("Server error.");
+    }
+  };
 
   return (
     <div className="w-full h-screen border-2 flex items-center px-[100px] relative overflow-hidden">
@@ -47,18 +82,24 @@ function LoginSpinner() {
       </Link>
 
       <div className="min-w-[400px] w-[50%] h-fit flex flex-col justify-center items-center m-3 z-10 ">
-        <div className="w-full h-[120px] bg-linear-to-t from-[#978665] from-5% via-[#FBEFD8]  to-[#978665] to-95% rounded-[8px]" />
+        <div className="w-full h-[120px] bg-gradient-to-t from-[#978665] via-[#FBEFD8] to-[#978665] rounded-[8px]" />
         <div className="bg-[#FBEFD8] w-[95%] flex flex-col items-center justify-center py-10 gap-10">
           <h1 className="text-6xl text-center font-gambarino underline decoration-2 underline-offset-8">
             Welcome back to <span className="font-aktura">DM's&nbsp;Log</span>
           </h1>
-          <form className="w-full px-5 flex flex-col items-center gap-8">
+          <form
+            onSubmit={handleLogin}
+            className="w-full px-5 flex flex-col items-center gap-8"
+          >
             <div className="w-[90%] border-b-2 border-black/60 px-10">
               <input
                 type="text"
                 id="username"
                 name="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 placeholder="Username"
+                required
                 className="w-full placeholder-gray-600 text-4xl focus:outline-none"
               />
             </div>
@@ -68,19 +109,22 @@ function LoginSpinner() {
                 type="password"
                 id="password"
                 name="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
+                required
                 className="placeholder-gray-600 text-4xl focus:outline-none"
               />
             </div>
 
+            {error && <p className="text-red-600 text-xl font-bold">{error}</p>}
+
             <button
-              href="/user/xxx"
               type="submit"
               className="w-[90%] uppercase py-3 text-3xl bg-red-500 text-white rounded-[8px]"
             >
               Continue in your journey
             </button>
-            <Link href="/user/xxx">muj skip</Link>
 
             <p className="text-xl uppercase">
               Don't have an account?{" "}
@@ -93,7 +137,7 @@ function LoginSpinner() {
             </p>
           </form>
         </div>
-        <div className="w-full h-[120px] bg-linear-to-t from-[#978665] from-5% via-[#FBEFD8]  to-[#978665] to-95% rounded-[8px]" />
+        <div className="w-full h-[120px] bg-gradient-to-t from-[#978665] via-[#FBEFD8] to-[#978665] rounded-[8px]" />
       </div>
 
       <div className="absolute top-[60%] left-3/5 -translate-y-1/2 z-10">
