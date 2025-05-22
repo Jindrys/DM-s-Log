@@ -16,42 +16,55 @@ export async function GET(req) {
 }
 
 export async function PATCH(req) {
-  const { inviteId, action } = await req.json(); // action = "accepted" or "declined"
+  try {
+    const { inviteId, action } = await req.json(); // action = "accepted" or "declined"
 
-  await dbConnect();
-  const invite = await Invite.findById(inviteId);
-  if (!invite)
-    return NextResponse.json({ message: "Invite not found" }, { status: 404 });
-
-  invite.status = action;
-  await invite.save();
-
-  if (action === "accepted") {
-    const campaign = await Campaign.findById(invite.campaignId);
-
-    if (!campaign)
+    await dbConnect();
+    const invite = await Invite.findById(inviteId);
+    if (!invite) {
       return NextResponse.json(
-        { message: "Campaign not found" },
+        { message: "Invite not found" },
         { status: 404 }
       );
-
-    // najdi správného participant indexu
-    const index = campaign.participants.findIndex(
-      (p) => p.username === invite.player
-    );
-
-    if (index !== -1) {
-      // aktualizuj participant na accepted
-      campaign.participants[index].accepted = true;
-      await campaign.save();
-
-      // aktualizuj odpovídající Hero
-      await Hero.findOneAndUpdate(
-        { campaign: campaign._id, index }, // podle kampaně a pozice
-        { owner: invite.player }
-      );
     }
-  }
 
-  return NextResponse.json({ message: "Invite updated" });
+    invite.status = action;
+    await invite.save();
+
+    if (action === "accepted") {
+      const campaign = await Campaign.findById(invite.campaignId);
+      if (!campaign) {
+        return NextResponse.json(
+          { message: "Campaign not found" },
+          { status: 404 }
+        );
+      }
+
+      // Přidání do players
+      await Campaign.findByIdAndUpdate(invite.campaignId, {
+        $push: { players: invite.player },
+      });
+
+      // Najdi správný index v participants
+      const participantIndex = campaign.participants.findIndex(
+        (p) => p.username === invite.player
+      );
+
+      if (participantIndex !== -1) {
+        // Přiřazení ownera k Hero
+        await Hero.findOneAndUpdate(
+          {
+            campaign: campaign.name,
+            index: participantIndex,
+          },
+          { owner: invite.player }
+        );
+      }
+    }
+
+    return NextResponse.json({ message: "Invite updated" });
+  } catch (err) {
+    console.error("❌ Error updating invite:", err);
+    return NextResponse.json({ message: "Server error" }, { status: 500 });
+  }
 }

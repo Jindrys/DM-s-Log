@@ -35,25 +35,33 @@ function LoginSpinner() {
     e.preventDefault();
     setError("");
 
+    const normalizedUsername = username
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "-");
+
     try {
       const res = await fetch("/api/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: normalizedUsername,
+          password,
+        }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.message || "Login failed.");
-        return;
+        throw new Error(data.error || "Přihlášení selhalo");
       }
 
-      localStorage.setItem("username", data.username);
-      router.push(`/user/${data.username}`);
+      localStorage.setItem("username", normalizedUsername);
+      router.push(`/user/${normalizedUsername}`);
     } catch (err) {
-      console.error(err);
-      setError("Server error.");
+      setError(err.message);
     }
   };
 

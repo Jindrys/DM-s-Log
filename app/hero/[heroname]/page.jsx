@@ -6,30 +6,34 @@ import Link from "next/link";
 import UserNav from "@/app/components/UserNav";
 import HeroEditModal from "@/app/components/HeroEditModal";
 
-function Page() {
+function HeroPage() {
   const { heroname } = useParams();
   const [hero, setHero] = useState(null);
   const [currentUser, setCurrentUser] = useState("");
   const [showEdit, setShowEdit] = useState(false);
 
-  const fetchHero = async () => {
-    try {
-      const res = await fetch("/api/hero");
-      const data = await res.json();
-      const found = data.find(
-        (h) =>
-          h.name.toLowerCase().replace(/\s+/g, "-") ===
-          decodeURIComponent(heroname).toLowerCase()
-      );
-      setHero(found || null);
-    } catch (err) {
-      console.error("❌ Error loading hero:", err);
-    }
-  };
+  const normalize = (str) => str.trim().toLowerCase().replace(/\s+/g, "-");
 
   useEffect(() => {
     const user = localStorage.getItem("username");
     if (user) setCurrentUser(user);
+
+    const fetchHero = async () => {
+      try {
+        const res = await fetch("/api/hero");
+        const data = await res.json();
+
+        const match = data.find(
+          (h) =>
+            normalize(h.name) === decodeURIComponent(heroname).toLowerCase()
+        );
+
+        setHero(match || null);
+      } catch (err) {
+        console.error("❌ Error loading hero:", err);
+      }
+    };
+
     if (heroname) fetchHero();
   }, [heroname]);
 
@@ -38,16 +42,16 @@ function Page() {
 
   if (!hero && currentUser) {
     return (
-      <div className="bg-black py-10 flex flex-col items-center h-fit min-h-screen">
+      <div className="bg-black py-10 flex flex-col items-center min-h-screen">
         <div className="w-[95%] flex flex-col items-center bg-[#F6EEE3] gap-10">
           <UserNav />
-          <div className="text-center mt-20 space-y-6">
+          <div className="min-h-screen text-center mt-20 space-y-6">
             <h2 className="text-4xl font-gambarino">
               Character not added yet.
             </h2>
             <Link
               href={`/user/${currentUser}`}
-              className="text-xl underline bg-white px-4 py-2 rounded"
+              className="text-xl underline bg-white px-4 py-2 rounded border"
             >
               Back to Campaigns
             </Link>
@@ -60,21 +64,21 @@ function Page() {
   if (!hero) return null;
 
   return (
-    <div className="bg-black py-10 flex flex-col items-center h-fit min-h-screen">
+    <div className="bg-black py-10 flex flex-col items-center min-h-screen">
       <div className="w-[95%] flex flex-col items-center bg-[#F6EEE3] gap-10">
         <UserNav />
+
         <div className="flex gap-5 items-center h-fit w-[90%]">
           <Link
-            href={`/campaign/${hero.campaign}`}
-            className="px-5 py-3 bg-gray-700 text-white rounded"
+            href={`/campaign/${hero.campaign.trim().replace(/\s+/g, "-")}`}
+            className="px-5 py-3 bg-gray-700 text-white rounded hover:bg-gray-500 transition-all duration-300"
           >
-            {" "}
             Back
           </Link>
           {isEditable && (
             <button
               onClick={() => setShowEdit(true)}
-              className="px-5 py-3 bg-gray-500 text-white rounded cursor-pointer"
+              className="px-5 py-3 bg-gray-500 text-white rounded cursor-pointer hover:bg-gray-700 transition-all duration-300"
             >
               Edit Hero
             </button>
@@ -106,15 +110,15 @@ function Page() {
 
           <div className="w-[60%] flex flex-col text-5xl font-gambarino gap-10">
             <div className="flex gap-3">
-              <h2>Species:</h2>
+              <h2 className="underline">Species:</h2>
               <h2>{hero.species || "-"}</h2>
             </div>
             <div className="flex gap-3">
-              <h2>Level:</h2>
+              <h2 className="underline">Level:</h2>
               <h2>{hero.level || "-"}</h2>
             </div>
             <div className="flex gap-3">
-              <h2>Class:</h2>
+              <h2 className="underline">Class:</h2>
               <h2>{hero.class || "-"}</h2>
             </div>
 
@@ -142,7 +146,7 @@ function Page() {
 
         <div className="w-[90%] min-h-[30vh] h-fit pb-10 flex flex-col gap-4">
           <h2 className="font-gambarino text-6xl underline">Story</h2>
-          <p className="text-justify w-[70%] text-xl">
+          <p className="text-justify w-[75%] text-xl whitespace-pre-line break-words">
             {hero.story || "No story yet."}
           </p>
         </div>
@@ -154,7 +158,18 @@ function Page() {
           onClose={() => setShowEdit(false)}
           onSave={() => {
             setShowEdit(false);
-            fetchHero();
+            // Refresh data
+            const refresh = async () => {
+              const res = await fetch("/api/hero");
+              const data = await res.json();
+              const match = data.find(
+                (h) =>
+                  normalize(h.name) ===
+                  decodeURIComponent(heroname).toLowerCase()
+              );
+              setHero(match || null);
+            };
+            refresh();
           }}
         />
       )}
@@ -162,4 +177,4 @@ function Page() {
   );
 }
 
-export default Page;
+export default HeroPage;

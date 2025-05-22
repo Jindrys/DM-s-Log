@@ -11,7 +11,6 @@ function UserNav() {
   const [invites, setInvites] = useState([]);
   const [createdMessage, setCreatedMessage] = useState("");
 
-  // Form inputs
   const [name, setName] = useState("");
   const [dungeonMaster, setDungeonMaster] = useState("");
   const [players, setPlayers] = useState("");
@@ -21,12 +20,12 @@ function UserNav() {
   const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [illustrationUrl, setIllustrationUrl] = useState("");
 
-  // Load username
+  // Load username from localStorage
   useEffect(() => {
     const user = localStorage.getItem("username");
     if (!user) router.push("/login");
-    setUsername(user);
-    setDungeonMaster(user);
+    setUsername(user.replace(/\s+/g, "-")); // normalize just in case
+    setDungeonMaster(user.replace(/\s+/g, "-"));
   }, [router]);
 
   // Load invites
@@ -128,24 +127,27 @@ function UserNav() {
           href={`/user/${username}`}
           className="text-6xl uppercase underline font-gambarino"
         >
-          {username}
+          {username.replace(/-/g, " ")}
         </Link>
 
         <button
           onClick={() => setShowInviteModal(true)}
-          className="underline text-2xl uppercase"
+          className="underline text-2xl uppercase cursor-pointer  hover:text-[26px] transition-all duration-400"
         >
           invites ({invites.length})
         </button>
 
         <button
           onClick={() => setShowModal(true)}
-          className="underline text-2xl uppercase"
+          className="underline text-2xl uppercase cursor-pointer  hover:text-3xl transition-all duration-400"
         >
           create campaign
         </button>
 
-        <Link href="/notes" className="underline text-2xl uppercase">
+        <Link
+          href="/notes"
+          className="underline text-2xl uppercase  cursor-pointer hover:text-3xl transition-all duration-400"
+        >
           notes
         </Link>
 
@@ -154,13 +156,12 @@ function UserNav() {
             localStorage.removeItem("username");
             router.push("/login");
           }}
-          className="underline text-xl uppercase bg-red-500/50 px-4 py-2 rounded"
+          className="underline text-xl text-black uppercase bg-gray-500/50 px-4 py-2 rounded  cursor-pointer hover:text-white hover:bg-gray-500 transition-all duration-400"
         >
           log out
         </button>
       </nav>
 
-      {/* Created message */}
       {createdMessage && (
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-2 rounded shadow-lg z-50">
           {createdMessage}
@@ -227,13 +228,13 @@ function UserNav() {
             <div className="flex justify-end space-x-4">
               <button
                 onClick={() => setShowModal(false)}
-                className="px-4 py-2 bg-gray-300 rounded"
+                className="px-4 py-2 bg-gray-300 rounded cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCreateCampaign}
-                className="px-4 py-2 bg-gray-700 text-white rounded"
+                className="px-4 py-2 bg-gray-700 text-white rounded cursor-pointer"
               >
                 Create
               </button>
@@ -265,7 +266,9 @@ function UserNav() {
                     className="relative border p-3 rounded bg-gray-100"
                   >
                     You're invited to:{" "}
-                    <strong>{invite.campaignId?.name}</strong>
+                    <strong>
+                      {invite.campaignId?.name?.replace(/-/g, " ")}
+                    </strong>
                     <div className="absolute flex gap-2 top-1/2 -translate-y-1/2 right-3">
                       <button
                         className="px-3 py-1 bg-green-500 text-white rounded"

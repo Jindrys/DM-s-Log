@@ -42,12 +42,21 @@ function Page() {
     fetchCampaigns();
   }, [routeUsername, router]);
 
+  // Filtrování kampaní
   const created = campaigns.filter((c) => c.creator === username);
+
   const joined = campaigns.filter(
-    (c) => c.players?.includes(username) && c.creator !== username
+    (c) =>
+      c.participants?.some(
+        (p) => p.username === username && p.accepted === true
+      ) && c.creator !== username
   );
+
   const others = campaigns.filter(
-    (c) => !c.players?.includes(username) && c.creator !== username
+    (c) =>
+      !c.participants?.some(
+        (p) => p.username === username && p.accepted === true
+      ) && c.creator !== username
   );
 
   if (!authorized) return null;

@@ -42,9 +42,18 @@ function RegisterSpinner() {
     }));
   };
 
+  const validatePassword = (password) => {
+    return /^(?=.*[A-Z])(?=.*\d).{8,}$/.test(password);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    const normalizedUsername = formData.username
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "-");
 
     try {
       const res = await fetch("/api/user", {
@@ -52,7 +61,10 @@ function RegisterSpinner() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          username: normalizedUsername,
+        }),
       });
 
       const data = await res.json();
@@ -61,8 +73,8 @@ function RegisterSpinner() {
         throw new Error(data.error || "Registrace selhala");
       }
 
-      localStorage.setItem("username", formData.username);
-      router.push(`/user/${formData.username}`);
+      localStorage.setItem("username", normalizedUsername);
+      router.push(`/user/${normalizedUsername}`);
     } catch (err) {
       setError(err.message);
     }
@@ -92,7 +104,7 @@ function RegisterSpinner() {
         </svg>
       </Link>
 
-      <div className="min-w-[400px] w-[50%] h-fit flex flex-col justify-center items-center m-3 z-10 ">
+      <div className="min-w-[400px] w-[50%] h-fit flex flex-col justify-center items-center m-3 z-10">
         <div className="w-full h-[120px] bg-gradient-to-t from-[#978665] via-[#FBEFD8] to-[#978665] rounded-[8px]" />
         <div className="bg-[#FBEFD8] w-[95%] flex flex-col items-center justify-center py-10 gap-10">
           <h1 className="text-6xl text-center font-gambarino underline decoration-2 underline-offset-8">
@@ -106,7 +118,6 @@ function RegisterSpinner() {
             <div className="w-[90%] border-b-2 border-black/60 px-10">
               <input
                 type="text"
-                id="username"
                 name="username"
                 placeholder="Username"
                 value={formData.username}
@@ -119,7 +130,6 @@ function RegisterSpinner() {
             <div className="w-[90%] border-b-2 border-black/60 px-10">
               <input
                 type="email"
-                id="email"
                 name="email"
                 placeholder="E-mail"
                 value={formData.email}
@@ -132,13 +142,12 @@ function RegisterSpinner() {
             <div className="w-[90%] border-b-2 border-black/60 px-10">
               <input
                 type="password"
-                id="password"
                 name="password"
                 placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="placeholder-gray-600 text-4xl focus:outline-none"
+                className="w-full placeholder-gray-600 text-4xl focus:outline-none"
               />
             </div>
 

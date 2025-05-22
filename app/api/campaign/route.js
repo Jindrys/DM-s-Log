@@ -5,7 +5,7 @@ import Invite from "@/models/Invite";
 import Hero from "@/models/Hero";
 
 // Normalize helper
-const normalize = (str) => str.trim().replace(/\s+/g, "-");
+const normalize = (str) => str.trim().toLowerCase().replace(/\s+/g, "-");
 
 export async function POST(req) {
   try {
@@ -105,6 +105,44 @@ export async function GET() {
     return NextResponse.json(campaigns);
   } catch (err) {
     console.error("❌ Chyba při GET kampaní:", err);
+    return NextResponse.json({ message: "Server error" }, { status: 500 });
+  }
+}
+
+export async function PATCH(req) {
+  try {
+    const { name, updates } = await req.json();
+
+    if (!name || !updates) {
+      return NextResponse.json(
+        { message: "Missing name or updates" },
+        { status: 400 }
+      );
+    }
+
+    await dbConnect();
+
+    const normalizedName = name.trim().replace(/\s+/g, "-");
+
+    const updated = await Campaign.findOneAndUpdate(
+      { name: new RegExp(`^${normalizedName}$`, "i") },
+      { $set: updates },
+      { new: true }
+    );
+
+    if (!updated) {
+      return NextResponse.json(
+        { message: "Campaign not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { message: "Campaign updated", campaign: updated },
+      { status: 200 }
+    );
+  } catch (err) {
+    console.error("❌ PATCH error:", err);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }

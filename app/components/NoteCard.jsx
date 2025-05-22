@@ -13,10 +13,7 @@ function NoteCard({ note, onDelete, onEdit, onView }) {
   const cancelDelete = () => setShowConfirm(false);
 
   return (
-    <div
-      className="relative w-[250px] h-[300px] border-2 bg-white rounded-[8px] flex flex-col items-center py-3 overflow-hidden cursor-pointer hover:shadow-md transition"
-      onClick={() => onView(note)}
-    >
+    <div className="relative w-[250px] h-[300px] border-2 bg-white rounded-[8px] flex flex-col items-center py-3 overflow-hidden hover:shadow-xl hover:shadow-black transition">
       <h2 className="text-2xl font-bold text-center px-2 truncate">{title}</h2>
       <div className="w-full flex-1 px-3 py-2 text-sm overflow-hidden">
         <p className="line-clamp-[10] overflow-hidden text-ellipsis">
@@ -25,10 +22,29 @@ function NoteCard({ note, onDelete, onEdit, onView }) {
       </div>
 
       {/* Ikony */}
-      <div
-        className="absolute bottom-2 right-2 flex bg-white gap-2 z-10"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="absolute bottom-2 right-2 flex bg-white gap-2 z-10">
+        {/* View */}
+        <svg
+          onClick={() => onView(note)}
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          className="size-6 cursor-pointer hover:text-green-500"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+          />
+        </svg>
+
         {/* Edit */}
         <svg
           onClick={() => onEdit(note)}
