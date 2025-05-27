@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <div className="bg-black flex flex-col items-center">
       <main className="w-full h-fit flex flex-col justify-start items-center">
-        <div className="absolute w-full flex items-center justify-center z-10 ">
+        <div className="absolute top-4 w-full flex items-center justify-center z-10 ">
           <Navbar />
         </div>
         <MainSpinner />
@@ -101,9 +101,6 @@ export default function Home() {
               Favourite campaigns
             </h2>
             <div className="flex flex-wrap gap-5 justify-between items-center">
-              <FavCamp />
-              <FavCamp />
-              <FavCamp />
               <FavCamp />
             </div>
           </div>

@@ -91,7 +91,7 @@ function CampaignEditModal({ campaign, onClose, onSaved }) {
           </button>
           <button
             onClick={handleSubmit}
-            className="px-4 py-2 bg-blue-700 text-white rounded"
+            className="px-4 py-2 bg-gray-700 text-white rounded"
           >
             Save Changes
           </button>
